@@ -3,20 +3,44 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Real Estate AI Assistant API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: agents
+    description: Agent profile operations
+  - name: leads
+    description: Leads management
+  - name: calls
+    description: Call log operations
+  - name: appointments
+    description: Appointment operations
+  - name: listings
+    description: Property listings
+  - name: faqs
+    description: FAQ entries
+  - name: integrations
+    description: Integration status
+  - name: voice
+    description: Voice agent settings
+  - name: onboarding
+    description: Onboarding flow
+  - name: dashboard
+    description: Dashboard summary data
+  - name: twilio
+    description: Twilio integration
+  - name: vapi
+    description: Vapi integration
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +48,587 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/recent-activity:
+    get:
+      operationId: getRecentActivity
+      tags: [dashboard]
+      summary: Get recent activity feed
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+  /agents/profile:
+    get:
+      operationId: getAgentProfile
+      tags: [agents]
+      summary: Get agent profile
+      responses:
+        "200":
+          description: Agent profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentProfile"
+    put:
+      operationId: updateAgentProfile
+      tags: [agents]
+      summary: Update agent profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAgentProfileBody"
+      responses:
+        "200":
+          description: Updated agent profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentProfile"
+
+  /agents/business-settings:
+    get:
+      operationId: getBusinessSettings
+      tags: [agents]
+      summary: Get business settings
+      responses:
+        "200":
+          description: Business settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessSettings"
+    put:
+      operationId: updateBusinessSettings
+      tags: [agents]
+      summary: Update business settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBusinessSettingsBody"
+      responses:
+        "200":
+          description: Updated business settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessSettings"
+
+  /agents/onboarding:
+    get:
+      operationId: getOnboardingProgress
+      tags: [onboarding]
+      summary: Get onboarding progress
+      responses:
+        "200":
+          description: Onboarding progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingProgress"
+    put:
+      operationId: updateOnboardingProgress
+      tags: [onboarding]
+      summary: Update onboarding step progress
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOnboardingProgressBody"
+      responses:
+        "200":
+          description: Updated onboarding progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingProgress"
+
+  /voice-settings:
+    get:
+      operationId: getVoiceSettings
+      tags: [voice]
+      summary: Get voice agent settings
+      responses:
+        "200":
+          description: Voice settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceSettings"
+    put:
+      operationId: updateVoiceSettings
+      tags: [voice]
+      summary: Update voice agent settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateVoiceSettingsBody"
+      responses:
+        "200":
+          description: Updated voice settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceSettings"
+
+  /faqs:
+    get:
+      operationId: listFaqs
+      tags: [faqs]
+      summary: List FAQ entries
+      responses:
+        "200":
+          description: List of FAQs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Faq"
+    post:
+      operationId: createFaq
+      tags: [faqs]
+      summary: Create a FAQ entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFaqBody"
+      responses:
+        "201":
+          description: Created FAQ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Faq"
+
+  /faqs/{id}:
+    put:
+      operationId: updateFaq
+      tags: [faqs]
+      summary: Update a FAQ entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFaqBody"
+      responses:
+        "200":
+          description: Updated FAQ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Faq"
+    delete:
+      operationId: deleteFaq
+      tags: [faqs]
+      summary: Delete a FAQ entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /leads:
+    get:
+      operationId: listLeads
+      tags: [leads]
+      summary: List leads
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of leads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lead"
+    post:
+      operationId: createLead
+      tags: [leads]
+      summary: Create a lead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLeadBody"
+      responses:
+        "201":
+          description: Created lead
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+
+  /leads/{id}:
+    get:
+      operationId: getLead
+      tags: [leads]
+      summary: Get a lead by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lead detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+    put:
+      operationId: updateLead
+      tags: [leads]
+      summary: Update a lead
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLeadBody"
+      responses:
+        "200":
+          description: Updated lead
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+
+  /leads/stats:
+    get:
+      operationId: getLeadStats
+      tags: [leads]
+      summary: Get lead status breakdown
+      responses:
+        "200":
+          description: Lead stats by status
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StatusCount"
+
+  /calls:
+    get:
+      operationId: listCalls
+      tags: [calls]
+      summary: List call logs
+      parameters:
+        - name: outcome
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of calls
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Call"
+
+  /calls/{id}:
+    get:
+      operationId: getCall
+      tags: [calls]
+      summary: Get a call by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Call detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Call"
+
+  /appointments:
+    get:
+      operationId: listAppointments
+      tags: [appointments]
+      summary: List appointments
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of appointments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Appointment"
+    post:
+      operationId: createAppointment
+      tags: [appointments]
+      summary: Create an appointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAppointmentBody"
+      responses:
+        "201":
+          description: Created appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+
+  /appointments/{id}:
+    put:
+      operationId: updateAppointment
+      tags: [appointments]
+      summary: Update an appointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAppointmentBody"
+      responses:
+        "200":
+          description: Updated appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+
+  /listings:
+    get:
+      operationId: listListings
+      tags: [listings]
+      summary: List property listings
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+    post:
+      operationId: createListing
+      tags: [listings]
+      summary: Create a listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateListingBody"
+      responses:
+        "201":
+          description: Created listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+  /listings/{id}:
+    get:
+      operationId: getListing
+      tags: [listings]
+      summary: Get a listing by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Listing detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+    put:
+      operationId: updateListing
+      tags: [listings]
+      summary: Update a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateListingBody"
+      responses:
+        "200":
+          description: Updated listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+    delete:
+      operationId: deleteListing
+      tags: [listings]
+      summary: Delete a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /integrations:
+    get:
+      operationId: listIntegrations
+      tags: [integrations]
+      summary: Get integration statuses
+      responses:
+        "200":
+          description: All integration statuses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Integration"
+
+  /twilio/numbers/search:
+    get:
+      operationId: searchTwilioNumbers
+      tags: [twilio]
+      summary: Search available Twilio numbers
+      parameters:
+        - name: areaCode
+          in: query
+          schema:
+            type: string
+        - name: contains
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Available phone numbers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PhoneNumberResult"
+
+  /twilio/numbers/purchase:
+    post:
+      operationId: purchaseTwilioNumber
+      tags: [twilio]
+      summary: Purchase a Twilio number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PurchaseNumberBody"
+      responses:
+        "200":
+          description: Purchased number info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PurchasedNumber"
+
+  /vapi/assistant/status:
+    get:
+      operationId: getVapiAssistantStatus
+      tags: [vapi]
+      summary: Get Vapi assistant status
+      responses:
+        "200":
+          description: Assistant status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VapiStatus"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +639,602 @@ components:
       required:
         - status
 
+    DashboardSummary:
+      type: object
+      properties:
+        totalLeads:
+          type: integer
+        newLeadsThisWeek:
+          type: integer
+        totalCalls:
+          type: integer
+        callsThisWeek:
+          type: integer
+        upcomingAppointments:
+          type: integer
+        activeListings:
+          type: integer
+        assistantStatus:
+          type: string
+          enum: [active, inactive, not_configured]
+        connectedPhone:
+          type: string
+          nullable: true
+        onboardingComplete:
+          type: boolean
+        onboardingStep:
+          type: integer
+      required:
+        - totalLeads
+        - newLeadsThisWeek
+        - totalCalls
+        - callsThisWeek
+        - upcomingAppointments
+        - activeListings
+        - assistantStatus
+        - connectedPhone
+        - onboardingComplete
+        - onboardingStep
+
+    ActivityItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [call, lead, appointment, listing]
+        description:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        icon:
+          type: string
+      required:
+        - id
+        - type
+        - description
+        - timestamp
+        - icon
+
+    StatusCount:
+      type: object
+      properties:
+        status:
+          type: string
+        count:
+          type: integer
+      required:
+        - status
+        - count
+
+    AgentProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        brokerage:
+          type: string
+          nullable: true
+        email:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        serviceAreas:
+          type: string
+          nullable: true
+        escalationContact:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - fullName
+        - email
+        - createdAt
+        - updatedAt
+
+    UpdateAgentProfileBody:
+      type: object
+      properties:
+        fullName:
+          type: string
+        brokerage:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        bio:
+          type: string
+        serviceAreas:
+          type: string
+        escalationContact:
+          type: string
+      required:
+        - fullName
+        - email
+
+    BusinessSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+        appointmentTypes:
+          type: string
+          nullable: true
+        appointmentDuration:
+          type: integer
+          nullable: true
+        bookingBuffer:
+          type: integer
+          nullable: true
+        officeHours:
+          type: string
+          nullable: true
+        leadRoutingPrefs:
+          type: string
+          nullable: true
+        handoffRules:
+          type: string
+          nullable: true
+        transferInstructions:
+          type: string
+          nullable: true
+        businessNotes:
+          type: string
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - updatedAt
+
+    UpdateBusinessSettingsBody:
+      type: object
+      properties:
+        appointmentTypes:
+          type: string
+        appointmentDuration:
+          type: integer
+        bookingBuffer:
+          type: integer
+        officeHours:
+          type: string
+        leadRoutingPrefs:
+          type: string
+        handoffRules:
+          type: string
+        transferInstructions:
+          type: string
+        businessNotes:
+          type: string
+
+    OnboardingProgress:
+      type: object
+      properties:
+        currentStep:
+          type: integer
+        completedSteps:
+          type: array
+          items:
+            type: integer
+        isComplete:
+          type: boolean
+      required:
+        - currentStep
+        - completedSteps
+        - isComplete
+
+    UpdateOnboardingProgressBody:
+      type: object
+      properties:
+        currentStep:
+          type: integer
+        completedStep:
+          type: integer
+      required:
+        - currentStep
+
+    VoiceSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+        selectedVoice:
+          type: string
+          nullable: true
+        greeting:
+          type: string
+          nullable: true
+        personality:
+          type: string
+          nullable: true
+        allowedActions:
+          type: string
+          nullable: true
+        escalationBehavior:
+          type: string
+          nullable: true
+        isActive:
+          type: boolean
+        vapiAssistantId:
+          type: string
+          nullable: true
+        linkedPhone:
+          type: string
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - isActive
+        - updatedAt
+
+    UpdateVoiceSettingsBody:
+      type: object
+      properties:
+        selectedVoice:
+          type: string
+        greeting:
+          type: string
+        personality:
+          type: string
+        allowedActions:
+          type: string
+        escalationBehavior:
+          type: string
+        isActive:
+          type: boolean
+
+    Faq:
+      type: object
+      properties:
+        id:
+          type: integer
+        question:
+          type: string
+        answer:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - question
+        - answer
+        - createdAt
+
+    CreateFaqBody:
+      type: object
+      properties:
+        question:
+          type: string
+        answer:
+          type: string
+      required:
+        - question
+        - answer
+
+    Lead:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        source:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [new, contacted, qualified, unqualified, converted]
+        intent:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - status
+        - createdAt
+        - updatedAt
+
+    CreateLeadBody:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        source:
+          type: string
+        status:
+          type: string
+          enum: [new, contacted, qualified, unqualified, converted]
+        intent:
+          type: string
+        notes:
+          type: string
+      required:
+        - name
+        - status
+
+    Call:
+      type: object
+      properties:
+        id:
+          type: integer
+        callerName:
+          type: string
+          nullable: true
+        callerPhone:
+          type: string
+          nullable: true
+        duration:
+          type: integer
+          nullable: true
+        outcome:
+          type: string
+          enum: [answered, missed, voicemail, transferred]
+          nullable: true
+        summary:
+          type: string
+          nullable: true
+        transcript:
+          type: string
+          nullable: true
+        extractedLeadId:
+          type: integer
+          nullable: true
+        calledAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - calledAt
+        - createdAt
+
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: integer
+        leadId:
+          type: integer
+          nullable: true
+        leadName:
+          type: string
+          nullable: true
+        type:
+          type: string
+          nullable: true
+        scheduledAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [upcoming, completed, cancelled, no_show]
+        source:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        calendarSynced:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - scheduledAt
+        - status
+        - calendarSynced
+        - createdAt
+
+    CreateAppointmentBody:
+      type: object
+      properties:
+        leadId:
+          type: integer
+        leadName:
+          type: string
+        type:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [upcoming, completed, cancelled, no_show]
+        source:
+          type: string
+        notes:
+          type: string
+      required:
+        - scheduledAt
+        - status
+
+    Listing:
+      type: object
+      properties:
+        id:
+          type: integer
+        address:
+          type: string
+        price:
+          type: number
+          nullable: true
+        beds:
+          type: integer
+          nullable: true
+        baths:
+          type: number
+          nullable: true
+        sqft:
+          type: integer
+          nullable: true
+        status:
+          type: string
+          enum: [active, pending, sold, off_market]
+        notes:
+          type: string
+          nullable: true
+        source:
+          type: string
+          enum: [manual, idx, mls, csv]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - address
+        - status
+        - source
+        - createdAt
+        - updatedAt
+
+    CreateListingBody:
+      type: object
+      properties:
+        address:
+          type: string
+        price:
+          type: number
+        beds:
+          type: integer
+        baths:
+          type: number
+        sqft:
+          type: integer
+        status:
+          type: string
+          enum: [active, pending, sold, off_market]
+        notes:
+          type: string
+        source:
+          type: string
+          enum: [manual, idx, mls, csv]
+      required:
+        - address
+        - status
+        - source
+
+    Integration:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [connected, disconnected, pending]
+        configuredAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - name
+        - description
+        - status
+
+    PhoneNumberResult:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+        friendlyName:
+          type: string
+        locality:
+          type: string
+          nullable: true
+        region:
+          type: string
+          nullable: true
+        monthlyFee:
+          type: string
+      required:
+        - phoneNumber
+        - friendlyName
+        - monthlyFee
+
+    PurchaseNumberBody:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+      required:
+        - phoneNumber
+
+    PurchasedNumber:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+        sid:
+          type: string
+        status:
+          type: string
+      required:
+        - phoneNumber
+        - sid
+        - status
+
+    VapiStatus:
+      type: object
+      properties:
+        assistantId:
+          type: string
+          nullable: true
+        isActive:
+          type: boolean
+        linkedPhone:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [configured, not_configured, error]
+      required:
+        - isActive
+        - status

@@ -1,0 +1,377 @@
+Build a production-minded SaaS starter for a product called “Estate Assistant AI” using React + TypeScript for the frontend, Node.js + TypeScript for the backend, and Supabase for auth/database/storage. The app should be structured so it can be exported cleanly from Replit and continued in VS Code. This is a multi-tenant SaaS for real estate agents to create and manage an AI voice assistant that answers calls, collects lead information, answers questions based on agent-specific data, books appointments, and sends summaries to the agent.
+
+GENERAL GOAL
+Create a clean MVP starter with a polished dashboard UI, strong file structure, placeholder integration modules, onboarding flow, and database-backed settings pages. Do not try to fully complete all external integrations in one shot, but wire the architecture correctly so the pieces are ready to connect. Prioritize maintainability, modularity, and clear separation between frontend, backend, database, and third-party integrations.
+
+TECH STACK
+- Frontend: React + TypeScript + Vite
+- Styling: Tailwind CSS
+- UI: clean modern SaaS dashboard style, professional and minimal
+- Backend: Node.js + TypeScript with Express
+- Database/Auth: Supabase
+- State/data fetching: React Query
+- Forms: React Hook Form + Zod validation
+- Routing: React Router
+- Environment variable support for all integrations
+- Use a monorepo-style or clearly separated structure if possible, but keep it Replit-friendly
+
+IMPORTANT ARCHITECTURE RULES
+- The backend is the control center for all business logic
+- The AI voice layer should NOT hold the business logic
+- External services (Twilio, Vapi, Google Calendar, OpenAI, MLS/IDX/RESO connectors) should each have their own service module on the backend
+- The app must be multi-tenant: each real estate agent only sees and manages their own data
+- Prepare the app so it can later be deployed with frontend on Netlify and backend on Render
+- Keep the code clean enough to export to VS Code and continue building
+- Use TypeScript types across frontend and backend as much as possible
+
+APP CONCEPT
+A real estate agent signs up for the service, logs in, and completes an onboarding flow. They:
+1. Build out their profile and structured business data
+2. Choose AI voice preferences
+3. Connect Google Calendar
+4. Search for and purchase a Twilio number from inside the SaaS
+5. Link that number to a Vapi assistant
+6. Connect a real estate data source later (manual listings first, then support for IDX/MLS/RESO-compatible integrations)
+7. Receive call summaries, lead records, appointments, and activity reporting through the dashboard
+
+MVP SCOPE
+Build the SaaS shell and all core screens with database support and placeholder integration actions:
+- Landing page
+- Auth pages (sign up, login)
+- Protected app dashboard
+- Multi-step onboarding wizard
+- Settings pages
+- Leads page
+- Calls page
+- Appointments page
+- Listings page
+- Integrations page
+- Voice agent settings page
+- Profile/business data page
+
+Do NOT build fake toy code. Build real app structure with placeholder/mock adapters where credentials or external services are not yet connected.
+
+BRANDING / UI DIRECTION
+Brand name: Estate Assistant AI
+Style: modern B2B SaaS, sleek, professional, trustworthy, premium but simple
+Use a calm palette with deep blue, white, slate/gray neutrals, and subtle accent color
+Make the UI look investor-demo ready
+Responsive design required
+Dashboard should feel like a professional operations platform, not a consumer app
+
+PAGES / FEATURES TO BUILD
+
+1. PUBLIC LANDING PAGE
+Create a strong SaaS landing page with:
+- Hero section
+- Short explanation of product
+- Features section
+- “How it works” section
+- Pricing placeholder section
+- CTA buttons for sign up / demo
+- Clean navbar and footer
+
+2. AUTH
+Create:
+- Sign up page
+- Login page
+- Supabase auth integration scaffold
+- Protected route wrapper
+- Session persistence
+
+3. APP LAYOUT
+After login, show a professional SaaS dashboard layout with:
+- Sidebar navigation
+- Top bar
+- User menu
+- Main content area
+- Nice cards/tables/forms
+
+4. ONBOARDING WIZARD
+Build a multi-step onboarding wizard with saved progress:
+Step 1: Agent Profile
+- full name
+- brokerage
+- email
+- phone
+- bio
+- service areas
+- office hours
+- escalation contact info
+
+Step 2: Structured Business Data
+- appointment types
+- appointment duration
+- booking buffer rules
+- preferred scheduling windows
+- lead routing preferences
+- FAQ seed entries
+- handoff/escalation rules
+- transfer instructions
+- business notes
+
+Step 3: Voice Preferences
+- choose from a few placeholder voices
+- assistant tone/personality
+- greeting style
+- communication preferences
+- what the assistant is allowed to do
+- what the assistant should escalate
+
+Step 4: Calendar Integration
+- Google Calendar connect button placeholder
+- connection status card
+- connected calendar email field
+- appointment rules section
+
+Step 5: Phone Number Setup
+- search Twilio numbers UI
+- list mock search results initially if needed
+- purchase/assign number flow
+- show linked number status
+- show Vapi assistant link status
+
+Step 6: Listings/Data Setup
+- choose data source type:
+  - manual listings
+  - CSV import placeholder
+  - IDX/API placeholder
+  - custom connector placeholder
+- connection status cards
+- small explanatory text
+
+Step 7: Review & Activate
+- show completed setup summary
+- activate assistant button
+- status badges
+
+5. DASHBOARD HOME
+Build a dashboard overview page showing:
+- assistant status
+- connected number
+- calendar status
+- leads count
+- recent calls
+- upcoming appointments
+- quick actions
+- onboarding completion progress if incomplete
+
+6. LEADS PAGE
+Build a leads management page with:
+- table of leads
+- status badges
+- source
+- intent
+- timeline
+- notes
+- search/filter UI
+- detail drawer or detail page
+
+7. CALLS PAGE
+Build a calls page with:
+- call log table
+- caller
+- timestamp
+- duration
+- outcome
+- transcript summary preview
+- ability to click into a call detail view
+- call detail page should show:
+  - call metadata
+  - summary
+  - transcript placeholder
+  - extracted lead info
+  - actions taken
+
+8. APPOINTMENTS PAGE
+Build an appointments page with:
+- upcoming appointments table
+- past appointments table
+- type
+- scheduled time
+- lead/contact
+- status
+- source
+- mock sync status from Google Calendar
+
+9. LISTINGS PAGE
+Build a listings management page that supports:
+- manual listing creation
+- listing table
+- address
+- price
+- beds
+- baths
+- square feet
+- status
+- notes
+- a connector status card for future IDX/MLS/RESO integrations
+
+10. INTEGRATIONS PAGE
+Build a clean integrations/settings page with cards for:
+- Supabase
+- Twilio
+- Vapi
+- OpenAI
+- Google Calendar
+- MLS/IDX/RESO data source
+Each should show:
+- connected/not connected status
+- small description
+- configure button
+- placeholder API key / OAuth status form where appropriate
+
+11. VOICE AGENT SETTINGS PAGE
+Build a page for managing the assistant configuration:
+- selected voice
+- first greeting
+- assistant instructions
+- allowed actions
+- escalation behavior
+- active/inactive toggle
+- preview panel
+- linked number info
+- linked Vapi assistant status
+
+12. PROFILE / BUSINESS SETTINGS PAGE
+Build forms to edit:
+- agent info
+- office/business rules
+- service areas
+- appointment preferences
+- FAQ entries
+- lead handling preferences
+
+DATABASE / SUPABASE
+Set up schema support and TypeScript types for these entities:
+- users
+- agents
+- agent_profiles
+- agent_business_hours
+- agent_faqs
+- agent_service_areas
+- agent_voice_settings
+- agent_phone_numbers
+- calendar_connections
+- listing_integrations
+- listings
+- leads
+- calls
+- call_transcripts
+- call_summaries
+- appointments
+- tool_logs
+
+Use reasonable fields and relationships.
+Every table should be scoped to an agent/account where appropriate.
+Prepare SQL migration files or schema definitions if possible.
+Add seed/demo data for local testing.
+
+BACKEND API
+Create Express backend routes with modular controllers/services for:
+- auth/session helper routes if needed
+- agent profile CRUD
+- onboarding progress
+- FAQ CRUD
+- business settings CRUD
+- listings CRUD
+- leads CRUD
+- calls fetch
+- appointments fetch
+- integration status fetch/update
+
+Also scaffold these integration endpoints, even if partially mocked:
+- GET /api/twilio/numbers/search
+- POST /api/twilio/numbers/purchase
+- POST /api/twilio/numbers/configure
+- GET /api/integrations/google/start
+- GET /api/integrations/google/callback
+- GET /api/calendar/availability
+- POST /api/calendar/book
+- POST /api/vapi/assistant/create
+- PATCH /api/vapi/assistant/update
+- POST /api/vapi/assistant/assign-number
+- POST /api/webhooks/vapi
+- POST /api/webhooks/twilio
+
+These routes should exist with clean controllers and service layers, even if some initially return mocked or placeholder data.
+
+SERVICE MODULES
+Create backend service modules for:
+- supabaseService
+- twilioService
+- vapiService
+- openaiService
+- googleCalendarService
+- realEstateDataService
+
+Each service should:
+- have clear method signatures
+- use environment variables
+- contain TODO comments for production integration
+- keep logic isolated
+
+OPENAI USAGE PREP
+Add backend placeholders for OpenAI-powered tasks:
+- summarize call transcript
+- extract lead data from transcript
+- classify call intent
+- generate short follow-up note
+
+Do not hardcode fragile prompts everywhere. Centralize prompt templates or AI task helpers in one folder.
+
+IMPORTANT: OpenAI is for summarization, extraction, classification, and assistant-support workflows. It is NOT the source of truth for listings, scheduling availability, or business rules.
+
+TWILIO / VAPI / GOOGLE / MLS LOGIC
+Scaffold the system so that:
+- agents can later buy/search Twilio numbers from the app
+- those numbers can later be linked to a Vapi assistant
+- Google Calendar can later be connected with OAuth
+- real estate listing data can later come from manual entries first and API connectors later
+
+For now, where full implementation is too much, create realistic mock flows and clearly marked service stubs.
+
+FRONTEND DETAILS
+Use:
+- React Query for server data
+- Reusable form components
+- Reusable dashboard card components
+- Reusable table components
+- Toasts for success/error messages
+- Loading and empty states
+- Good validation with Zod
+- Clean UX throughout
+
+CODE QUALITY
+- Use TypeScript throughout
+- Organize code into clear folders
+- Avoid giant files
+- Avoid sloppy prototype code
+- Add comments where helpful
+- Make the project export-ready for VS Code
+- Keep environment config organized with example env file
+
+FOLDER STRUCTURE
+Use a structure that is easy to grow and export. Something close to:
+- client/
+- server/
+- shared/
+Or a similar clean split if you think something better works in Replit.
+
+INCLUDE
+- README with setup instructions
+- .env.example file
+- notes in README for how to later connect Supabase, Twilio, Vapi, Google Calendar, and OpenAI
+- placeholder demo account/data if helpful
+- basic seed data for listings, leads, calls, and appointments
+
+NICE TO HAVE
+If possible, include:
+- onboarding completion tracker
+- assistant status badge component
+- simple analytics cards on dashboard
+- recent activity feed
+- role-ready architecture for future brokerage/team support
+
+FINAL EXPECTATION
+I want a polished SaaS starter that already feels like the correct foundation for a real business. It should not just be a UI mockup. It should have real forms, real state, database-ready models, backend API scaffolding, and a clear architecture for Twilio + Vapi + Google Calendar + OpenAI + real estate data integrations.
