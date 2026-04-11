@@ -5,35 +5,56 @@ import { eq, and, sql } from "drizzle-orm";
 import { ListCallsQueryParams, GetCallParams } from "@workspace/api-zod";
 
 const router = Router();
-const DEMO_AGENT_ID = 1;
+
+// Helper function to get agent ID from request
+const getAgentId = (req: any): string => {
+  const agentId = req.headers['x-agent-id'] || req.user?.id;
+  if (!agentId) {
+    throw new Error('Agent ID not found in request');
+  }
+  return agentId;
+};
 
 router.get("/calls", async (req, res) => {
-  const query = ListCallsQueryParams.parse(req.query);
+  try {
+    const agentId = getAgentId(req);
+    const query = ListCallsQueryParams.parse(req.query);
 
-  const conditions = [eq(callsTable.agentId, DEMO_AGENT_ID)];
-  if (query.outcome) {
-    conditions.push(eq(callsTable.outcome, query.outcome));
+    const conditions = [eq(callsTable.agentId, agentId)];
+    if (query.outcome) {
+      conditions.push(eq(callsTable.outcome, query.outcome));
+    }
+
+    const calls = await db
+      .select()
+      .from(callsTable)
+      .where(and(...conditions))
+      .orderBy(sql`${callsTable.createdAt} DESC`);
+
+    res.json(calls);
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
   }
-
-  const calls = await db
-    .select()
-    .from(callsTable)
-    .where(and(...conditions))
-    .orderBy(sql`${callsTable.calledAt} DESC`);
-
-  res.json(calls);
 });
 
 router.get("/calls/:id", async (req, res) => {
-  const { id } = GetCallParams.parse(req.params);
-  const call = await db
-    .select()
-    .from(callsTable)
-    .where(and(eq(callsTable.id, id), eq(callsTable.agentId, DEMO_AGENT_ID)))
-    .limit(1);
+  try {
+    const agentId = getAgentId(req);
+    const { id } = GetCallParams.parse(req.params);
+    const call = await db
+      .select()
+      .from(callsTable)
+      .where(and(eq(callsTable.id, id), eq(callsTable.agentId, agentId)))
+      .limit(1);
 
-  if (call.length === 0) return res.status(404).json({ error: "Not found" });
-  res.json(call[0]);
+    if (call.length === 0) {
+      return res.status(404).json({ error: "Call not found" });
+    }
+    
+    res.json(call[0]);
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
 });
 
 export default router;

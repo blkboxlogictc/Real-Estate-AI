@@ -5,44 +5,82 @@ import { eq, and } from "drizzle-orm";
 import { CreateFaqBody, UpdateFaqBody, UpdateFaqParams, DeleteFaqParams } from "@workspace/api-zod";
 
 const router = Router();
-const DEMO_AGENT_ID = 1;
+
+// Helper function to get agent ID from request
+const getAgentId = (req: any): string => {
+  const agentId = req.headers['x-agent-id'] || req.user?.id;
+  if (!agentId) {
+    throw new Error('Agent ID not found in request');
+  }
+  return agentId;
+};
 
 router.get("/faqs", async (req, res) => {
-  const faqs = await db
-    .select()
-    .from(faqsTable)
-    .where(eq(faqsTable.agentId, DEMO_AGENT_ID))
-    .orderBy(faqsTable.createdAt);
-  res.json(faqs);
+  try {
+    const agentId = getAgentId(req);
+    const faqs = await db
+      .select()
+      .from(faqsTable)
+      .where(eq(faqsTable.agentId, agentId))
+      .orderBy(faqsTable.order);
+    res.json(faqs);
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
 });
 
 router.post("/faqs", async (req, res) => {
-  const body = CreateFaqBody.parse(req.body);
-  const created = await db
-    .insert(faqsTable)
-    .values({ ...body, agentId: DEMO_AGENT_ID })
-    .returning();
-  res.status(201).json(created[0]);
+  try {
+    const agentId = getAgentId(req);
+    const body = CreateFaqBody.parse(req.body);
+    const created = await db
+      .insert(faqsTable)
+      .values({ ...body, agentId })
+      .returning();
+    res.status(201).json(created[0]);
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
 });
 
 router.put("/faqs/:id", async (req, res) => {
-  const { id } = UpdateFaqParams.parse(req.params);
-  const body = UpdateFaqBody.parse(req.body);
-  const updated = await db
-    .update(faqsTable)
-    .set(body)
-    .where(and(eq(faqsTable.id, id), eq(faqsTable.agentId, DEMO_AGENT_ID)))
-    .returning();
-  if (updated.length === 0) return res.status(404).json({ error: "Not found" });
-  res.json(updated[0]);
+  try {
+    const agentId = getAgentId(req);
+    const { id } = UpdateFaqParams.parse(req.params);
+    const body = UpdateFaqBody.parse(req.body);
+    const updated = await db
+      .update(faqsTable)
+      .set({ ...body, updatedAt: new Date() })
+      .where(and(eq(faqsTable.id, id), eq(faqsTable.agentId, agentId)))
+      .returning();
+      
+    if (updated.length === 0) {
+      return res.status(404).json({ error: "FAQ not found" });
+    }
+    
+    res.json(updated[0]);
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
 });
 
 router.delete("/faqs/:id", async (req, res) => {
-  const { id } = DeleteFaqParams.parse(req.params);
-  await db
-    .delete(faqsTable)
-    .where(and(eq(faqsTable.id, id), eq(faqsTable.agentId, DEMO_AGENT_ID)));
-  res.status(204).send();
+  try {
+    const agentId = getAgentId(req);
+    const { id } = DeleteFaqParams.parse(req.params);
+    const deleted = await db
+      .delete(faqsTable)
+      .where(and(eq(faqsTable.id, id), eq(faqsTable.agentId, agentId)))
+      .returning();
+      
+    if (deleted.length === 0) {
+      return res.status(404).json({ error: "FAQ not found" });
+    }
+    
+    res.status(204).send();
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
 });
 
 export default router;

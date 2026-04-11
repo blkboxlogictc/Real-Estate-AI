@@ -5,93 +5,135 @@ import { eq, and, sql } from "drizzle-orm";
 import { CreateListingBody, UpdateListingBody, ListListingsQueryParams, GetListingParams, UpdateListingParams, DeleteListingParams } from "@workspace/api-zod";
 
 const router = Router();
-const DEMO_AGENT_ID = 1;
+
+// Helper function to get agent ID from request
+const getAgentId = (req: any): string => {
+  const agentId = req.headers['x-agent-id'] || req.user?.id;
+  if (!agentId) {
+    throw new Error('Agent ID not found in request');
+  }
+  return agentId;
+};
 
 router.get("/listings", async (req, res) => {
-  const query = ListListingsQueryParams.parse(req.query);
+  try {
+    const agentId = getAgentId(req);
+    const query = ListListingsQueryParams.parse(req.query);
 
-  const conditions = [eq(listingsTable.agentId, DEMO_AGENT_ID)];
-  if (query.status) {
-    conditions.push(eq(listingsTable.status, query.status));
+    const conditions = [eq(listingsTable.agentId, agentId)];
+    if (query.status) {
+      conditions.push(eq(listingsTable.status, query.status));
+    }
+
+    const listings = await db
+      .select()
+      .from(listingsTable)
+      .where(and(...conditions))
+      .orderBy(sql`${listingsTable.createdAt} DESC`);
+
+    res.json(listings.map(l => ({
+      ...l,
+      price: l.price ? parseFloat(l.price.toString()) : null,
+      bathrooms: l.bathrooms ? parseFloat(l.bathrooms.toString()) : null,
+    })));
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
   }
-
-  const listings = await db
-    .select()
-    .from(listingsTable)
-    .where(and(...conditions))
-    .orderBy(sql`${listingsTable.createdAt} DESC`);
-
-  res.json(listings.map(l => ({
-    ...l,
-    price: l.price ? parseFloat(l.price) : null,
-    baths: l.baths ? parseFloat(l.baths) : null,
-  })));
 });
 
 router.post("/listings", async (req, res) => {
-  const body = CreateListingBody.parse(req.body);
-  const created = await db
-    .insert(listingsTable)
-    .values({
-      ...body,
-      agentId: DEMO_AGENT_ID,
-      price: body.price?.toString(),
-      baths: body.baths?.toString(),
-    })
-    .returning();
-  const l = created[0];
-  res.status(201).json({
-    ...l,
-    price: l.price ? parseFloat(l.price) : null,
-    baths: l.baths ? parseFloat(l.baths) : null,
-  });
+  try {
+    const agentId = getAgentId(req);
+    const body = CreateListingBody.parse(req.body);
+    const created = await db
+      .insert(listingsTable)
+      .values({
+        ...body,
+        agentId,
+      })
+      .returning();
+    const l = created[0];
+    res.status(201).json({
+      ...l,
+      price: l.price ? parseFloat(l.price.toString()) : null,
+      bathrooms: l.bathrooms ? parseFloat(l.bathrooms.toString()) : null,
+    });
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
 });
 
 router.get("/listings/:id", async (req, res) => {
-  const { id } = GetListingParams.parse(req.params);
-  const listing = await db
-    .select()
-    .from(listingsTable)
-    .where(and(eq(listingsTable.id, id), eq(listingsTable.agentId, DEMO_AGENT_ID)))
-    .limit(1);
+  try {
+    const agentId = getAgentId(req);
+    const { id } = GetListingParams.parse(req.params);
+    const listing = await db
+      .select()
+      .from(listingsTable)
+      .where(and(eq(listingsTable.id, id), eq(listingsTable.agentId, agentId)))
+      .limit(1);
 
-  if (listing.length === 0) return res.status(404).json({ error: "Not found" });
-  const l = listing[0];
-  res.json({
-    ...l,
-    price: l.price ? parseFloat(l.price) : null,
-    baths: l.baths ? parseFloat(l.baths) : null,
-  });
+    if (listing.length === 0) {
+      return res.status(404).json({ error: "Listing not found" });
+    }
+    
+    const l = listing[0];
+    res.json({
+      ...l,
+      price: l.price ? parseFloat(l.price.toString()) : null,
+      bathrooms: l.bathrooms ? parseFloat(l.bathrooms.toString()) : null,
+    });
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
 });
 
 router.put("/listings/:id", async (req, res) => {
-  const { id } = UpdateListingParams.parse(req.params);
-  const body = UpdateListingBody.parse(req.body);
-  const updated = await db
-    .update(listingsTable)
-    .set({
-      ...body,
-      price: body.price?.toString(),
-      baths: body.baths?.toString(),
-      updatedAt: new Date(),
-    })
-    .where(and(eq(listingsTable.id, id), eq(listingsTable.agentId, DEMO_AGENT_ID)))
-    .returning();
-  if (updated.length === 0) return res.status(404).json({ error: "Not found" });
-  const l = updated[0];
-  res.json({
-    ...l,
-    price: l.price ? parseFloat(l.price) : null,
-    baths: l.baths ? parseFloat(l.baths) : null,
-  });
+  try {
+    const agentId = getAgentId(req);
+    const { id } = UpdateListingParams.parse(req.params);
+    const body = UpdateListingBody.parse(req.body);
+    const updated = await db
+      .update(listingsTable)
+      .set({
+        ...body,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(listingsTable.id, id), eq(listingsTable.agentId, agentId)))
+      .returning();
+      
+    if (updated.length === 0) {
+      return res.status(404).json({ error: "Listing not found" });
+    }
+    
+    const l = updated[0];
+    res.json({
+      ...l,
+      price: l.price ? parseFloat(l.price.toString()) : null,
+      bathrooms: l.bathrooms ? parseFloat(l.bathrooms.toString()) : null,
+    });
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
 });
 
 router.delete("/listings/:id", async (req, res) => {
-  const { id } = DeleteListingParams.parse(req.params);
-  await db
-    .delete(listingsTable)
-    .where(and(eq(listingsTable.id, id), eq(listingsTable.agentId, DEMO_AGENT_ID)));
-  res.status(204).send();
+  try {
+    const agentId = getAgentId(req);
+    const { id } = DeleteListingParams.parse(req.params);
+    const deleted = await db
+      .delete(listingsTable)
+      .where(and(eq(listingsTable.id, id), eq(listingsTable.agentId, agentId)))
+      .returning();
+      
+    if (deleted.length === 0) {
+      return res.status(404).json({ error: "Listing not found" });
+    }
+    
+    res.status(204).send();
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
 });
 
 export default router;

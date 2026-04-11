@@ -5,76 +5,96 @@ import { eq } from "drizzle-orm";
 import { UpdateVoiceSettingsBody } from "@workspace/api-zod";
 
 const router = Router();
-const DEMO_AGENT_ID = 1;
+
+// Helper function to get agent ID from request
+const getAgentId = (req: any): string => {
+  const agentId = req.headers['x-agent-id'] || req.user?.id;
+  if (!agentId) {
+    throw new Error('Agent ID not found in request');
+  }
+  return agentId;
+};
 
 router.get("/voice-settings", async (req, res) => {
-  const settings = await db
-    .select()
-    .from(voiceSettingsTable)
-    .where(eq(voiceSettingsTable.agentId, DEMO_AGENT_ID))
-    .limit(1);
+  try {
+    const agentId = getAgentId(req);
+    const settings = await db
+      .select()
+      .from(voiceSettingsTable)
+      .where(eq(voiceSettingsTable.agentId, agentId))
+      .limit(1);
 
-  if (settings.length === 0) {
-    const created = await db
-      .insert(voiceSettingsTable)
-      .values({
-        agentId: DEMO_AGENT_ID,
-        selectedVoice: "nova",
-        greeting: "Hi, you've reached the office of Alex Johnson with Premier Realty Group. How can I help you today?",
-        personality: "professional, warm, knowledgeable",
-        allowedActions: "Answer questions about listings,Schedule appointments,Collect contact information,Provide neighborhood information",
-        escalationBehavior: "Transfer to agent for offers, legal questions, or when caller explicitly requests a human.",
-        isActive: false,
-      })
-      .returning();
-    return res.json(created[0]);
+    if (settings.length === 0) {
+      const created = await db
+        .insert(voiceSettingsTable)
+        .values({
+          agentId,
+          voiceId: "nova",
+          greeting: "Hi, you've reached my real estate office. How can I help you today?",
+          isActive: false,
+        })
+        .returning();
+      return res.json(created[0]);
+    }
+    res.json(settings[0]);
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
   }
-  res.json(settings[0]);
 });
 
 router.put("/voice-settings", async (req, res) => {
-  const body = UpdateVoiceSettingsBody.parse(req.body);
+  try {
+    const agentId = getAgentId(req);
+    const body = UpdateVoiceSettingsBody.parse(req.body);
 
-  const existing = await db
-    .select()
-    .from(voiceSettingsTable)
-    .where(eq(voiceSettingsTable.agentId, DEMO_AGENT_ID))
-    .limit(1);
+    const existing = await db
+      .select()
+      .from(voiceSettingsTable)
+      .where(eq(voiceSettingsTable.agentId, agentId))
+      .limit(1);
 
-  if (existing.length === 0) {
-    const created = await db
-      .insert(voiceSettingsTable)
-      .values({ agentId: DEMO_AGENT_ID, ...body })
+    if (existing.length === 0) {
+      const created = await db
+        .insert(voiceSettingsTable)
+        .values({ agentId, ...body })
+        .returning();
+      return res.json(created[0]);
+    }
+
+    const updated = await db
+      .update(voiceSettingsTable)
+      .set({ ...body, updatedAt: new Date() })
+      .where(eq(voiceSettingsTable.agentId, agentId))
       .returning();
-    return res.json(created[0]);
+    res.json(updated[0]);
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
   }
-
-  const updated = await db
-    .update(voiceSettingsTable)
-    .set({ ...body, updatedAt: new Date() })
-    .where(eq(voiceSettingsTable.agentId, DEMO_AGENT_ID))
-    .returning();
-  res.json(updated[0]);
 });
 
 router.get("/vapi/assistant/status", async (req, res) => {
-  const settings = await db
-    .select()
-    .from(voiceSettingsTable)
-    .where(eq(voiceSettingsTable.agentId, DEMO_AGENT_ID))
-    .limit(1);
+  try {
+    const agentId = getAgentId(req);
+    const settings = await db
+      .select()
+      .from(voiceSettingsTable)
+      .where(eq(voiceSettingsTable.agentId, agentId))
+      .limit(1);
 
-  if (settings.length === 0) {
-    return res.json({ assistantId: null, isActive: false, linkedPhone: null, status: "not_configured" });
+    if (settings.length === 0) {
+      return res.json({ assistantId: null, isActive: false, phoneNumber: null, status: "not_configured" });
+    }
+
+    const s = settings[0];
+    res.json({
+      assistantId: s.vapiAssistantId,
+      isActive: s.isActive,
+      phoneNumber: s.phoneNumber,
+      status: s.vapiAssistantId ? "configured" : "not_configured",
+    });
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
   }
-
-  const s = settings[0];
-  res.json({
-    assistantId: s.vapiAssistantId,
-    isActive: s.isActive,
-    linkedPhone: s.linkedPhone,
-    status: s.vapiAssistantId ? "configured" : "not_configured",
-  });
 });
 
 export default router;
