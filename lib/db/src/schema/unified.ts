@@ -261,17 +261,3 @@ export const insertPlanEntitlementSchema = createInsertSchema(planEntitlementsTa
 export type InsertPlanEntitlement = z.infer<typeof insertPlanEntitlementSchema>;
 export type PlanEntitlement = typeof planEntitlementsTable.$inferSelect;
 
-// Export all tables
-export {
-  agentProfilesTable,
-  businessSettingsTable,
-  onboardingProgressTable,
-  leadsTable,
-  listingsTable,
-  appointmentsTable,
-  callsTable,
-  voiceSettingsTable,
-  faqsTable,
-  integrationsTable,
-  planEntitlementsTable,
-};
