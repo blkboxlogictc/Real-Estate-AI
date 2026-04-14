@@ -22,7 +22,7 @@ export default function Calls() {
       case "answered": return <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20 border-0"><PhoneIncoming className="h-3 w-3 mr-1"/> Answered</Badge>;
       case "missed": return <Badge className="bg-red-500/10 text-red-500 hover:bg-red-500/20 border-0"><PhoneMissed className="h-3 w-3 mr-1"/> Missed</Badge>;
       case "voicemail": return <Badge className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 border-0">Voicemail</Badge>;
-      case "transferred": return <Badge className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-0"><PhoneForwarded className="h-3 w-3 mr-1"/> Transferred</Badge>;
+      case "transferred": return <Badge className="bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 border-0"><PhoneForwarded className="h-3 w-3 mr-1"/> Transferred</Badge>;
       default: return <Badge variant="outline">Unknown</Badge>;
     }
   };

@@ -15,7 +15,7 @@ export default function Leads() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "new": return "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20";
+      case "new": return "bg-amber-400/10 text-amber-400 hover:bg-amber-400/20";
       case "contacted": return "bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20";
       case "qualified": return "bg-green-500/10 text-green-500 hover:bg-green-500/20";
       case "converted": return "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20";

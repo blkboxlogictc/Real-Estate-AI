@@ -1,6 +1,6 @@
 import { pgTable, uuid, text, integer, boolean, timestamp, decimal, pgEnum } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 // Enums
 export const callOutcomeEnum = pgEnum('call_outcome', ['completed', 'no_answer', 'voicemail', 'busy', 'failed']);

@@ -37,18 +37,18 @@ export default function Dashboard() {
       </div>
 
       {summary && !summary.onboardingComplete && (
-        <Card className="border-blue-500/30 bg-blue-500/5 shadow-none">
+        <Card className="border-primary/30 bg-primary/5 shadow-none">
           <CardContent className="p-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-500/20 rounded-full text-blue-500">
+              <div className="p-3 bg-primary/20 rounded-full text-primary">
                 <AlertCircle className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg text-blue-100">Finish setting up your agent</h3>
-                <p className="text-blue-200/70 text-sm">You are on step {summary.onboardingStep} of 7. Complete onboarding to activate your number.</p>
+                <h3 className="font-semibold text-lg text-foreground">Finish setting up your agent</h3>
+                <p className="text-muted-foreground text-sm">You are on step {summary.onboardingStep} of 7. Complete onboarding to activate your number.</p>
               </div>
             </div>
-            <a href="/onboarding" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium text-sm transition-colors">
+            <a href="/onboarding" className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md font-medium text-sm transition-colors">
               Continue Onboarding
             </a>
           </CardContent>

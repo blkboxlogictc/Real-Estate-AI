@@ -13,7 +13,7 @@ export default function Listings() {
     switch (status) {
       case "active": return <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20 border-0">Active</Badge>;
       case "pending": return <Badge className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 border-0">Pending</Badge>;
-      case "sold": return <Badge className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-0">Sold</Badge>;
+      case "sold": return <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-0">Sold</Badge>;
       case "off_market": return <Badge className="bg-slate-500/10 text-slate-500 hover:bg-slate-500/20 border-0">Off Market</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }

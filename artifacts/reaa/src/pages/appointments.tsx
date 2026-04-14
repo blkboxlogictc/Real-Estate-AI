@@ -15,7 +15,7 @@ export default function Appointments() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "upcoming": return <Badge className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-0">Upcoming</Badge>;
+      case "upcoming": return <Badge className="bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 border-0">Upcoming</Badge>;
       case "completed": return <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20 border-0">Completed</Badge>;
       case "cancelled": return <Badge className="bg-red-500/10 text-red-500 hover:bg-red-500/20 border-0">Cancelled</Badge>;
       case "no_show": return <Badge className="bg-orange-500/10 text-orange-500 hover:bg-orange-500/20 border-0">No Show</Badge>;
