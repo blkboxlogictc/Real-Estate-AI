@@ -1,5 +1,4 @@
 import { pgTable, serial, text, integer, boolean, timestamp } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const agentProfilesTable = pgTable("agent_profiles", {
@@ -15,7 +14,16 @@ export const agentProfilesTable = pgTable("agent_profiles", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertAgentProfileSchema = createInsertSchema(agentProfilesTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertAgentProfileSchema = z.object({
+  fullName: z.string(),
+  brokerage: z.string().nullable().optional(),
+  email: z.string().email(),
+  phone: z.string().nullable().optional(),
+  bio: z.string().nullable().optional(),
+  serviceAreas: z.string().nullable().optional(),
+  escalationContact: z.string().nullable().optional(),
+});
+
 export type InsertAgentProfile = z.infer<typeof insertAgentProfileSchema>;
 export type AgentProfile = typeof agentProfilesTable.$inferSelect;
 
@@ -33,7 +41,18 @@ export const businessSettingsTable = pgTable("business_settings", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertBusinessSettingsSchema = createInsertSchema(businessSettingsTable).omit({ id: true, updatedAt: true });
+export const insertBusinessSettingsSchema = z.object({
+  agentId: z.number().int(),
+  appointmentTypes: z.string().nullable().optional(),
+  appointmentDuration: z.number().int().nullable().optional(),
+  bookingBuffer: z.number().int().nullable().optional(),
+  officeHours: z.string().nullable().optional(),
+  leadRoutingPrefs: z.string().nullable().optional(),
+  handoffRules: z.string().nullable().optional(),
+  transferInstructions: z.string().nullable().optional(),
+  businessNotes: z.string().nullable().optional(),
+});
+
 export type InsertBusinessSettings = z.infer<typeof insertBusinessSettingsSchema>;
 export type BusinessSettings = typeof businessSettingsTable.$inferSelect;
 

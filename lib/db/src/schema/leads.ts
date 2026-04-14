@@ -1,5 +1,4 @@
 import { pgTable, serial, text, integer, timestamp } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const leadsTable = pgTable("leads", {
@@ -16,6 +15,16 @@ export const leadsTable = pgTable("leads", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertLeadSchema = createInsertSchema(leadsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertLeadSchema = z.object({
+  agentId: z.number().int(),
+  name: z.string(),
+  phone: z.string().nullable().optional(),
+  email: z.string().nullable().optional(),
+  source: z.string().nullable().optional(),
+  status: z.string().optional(),
+  intent: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
+});
+
 export type InsertLead = z.infer<typeof insertLeadSchema>;
 export type Lead = typeof leadsTable.$inferSelect;

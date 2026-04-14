@@ -1,5 +1,4 @@
 import { pgTable, serial, text, integer, boolean, timestamp } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const voiceSettingsTable = pgTable("voice_settings", {
@@ -16,6 +15,17 @@ export const voiceSettingsTable = pgTable("voice_settings", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertVoiceSettingsSchema = createInsertSchema(voiceSettingsTable).omit({ id: true, updatedAt: true });
+export const insertVoiceSettingsSchema = z.object({
+  agentId: z.number().int(),
+  selectedVoice: z.string().nullable().optional(),
+  greeting: z.string().nullable().optional(),
+  personality: z.string().nullable().optional(),
+  allowedActions: z.string().nullable().optional(),
+  escalationBehavior: z.string().nullable().optional(),
+  isActive: z.boolean().optional(),
+  vapiAssistantId: z.string().nullable().optional(),
+  linkedPhone: z.string().nullable().optional(),
+});
+
 export type InsertVoiceSettings = z.infer<typeof insertVoiceSettingsSchema>;
 export type VoiceSettings = typeof voiceSettingsTable.$inferSelect;

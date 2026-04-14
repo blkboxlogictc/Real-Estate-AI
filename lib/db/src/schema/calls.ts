@@ -1,5 +1,4 @@
 import { pgTable, serial, text, integer, timestamp } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const callsTable = pgTable("calls", {
@@ -16,6 +15,17 @@ export const callsTable = pgTable("calls", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertCallSchema = createInsertSchema(callsTable).omit({ id: true, createdAt: true });
+export const insertCallSchema = z.object({
+  agentId: z.number().int(),
+  callerName: z.string().nullable().optional(),
+  callerPhone: z.string().nullable().optional(),
+  duration: z.number().int().nullable().optional(),
+  outcome: z.string().nullable().optional(),
+  summary: z.string().nullable().optional(),
+  transcript: z.string().nullable().optional(),
+  extractedLeadId: z.number().int().nullable().optional(),
+  calledAt: z.date().optional(),
+});
+
 export type InsertCall = z.infer<typeof insertCallSchema>;
 export type Call = typeof callsTable.$inferSelect;

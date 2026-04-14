@@ -1,5 +1,4 @@
 import { pgTable, uuid, text, integer, boolean, timestamp, decimal, pgEnum } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Enums
@@ -24,7 +23,16 @@ export const agentProfilesTable = pgTable("agent_profiles", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertAgentProfileSchema = createInsertSchema(agentProfilesTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertAgentProfileSchema = z.object({
+  fullName: z.string(),
+  brokerage: z.string().nullable().optional(),
+  email: z.string().email(),
+  phone: z.string().nullable().optional(),
+  bio: z.string().nullable().optional(),
+  serviceAreas: z.string().nullable().optional(),
+  escalationContact: z.string().nullable().optional(),
+});
+
 export type InsertAgentProfile = z.infer<typeof insertAgentProfileSchema>;
 export type AgentProfile = typeof agentProfilesTable.$inferSelect;
 
@@ -44,7 +52,18 @@ export const businessSettingsTable = pgTable("business_settings", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertBusinessSettingsSchema = createInsertSchema(businessSettingsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertBusinessSettingsSchema = z.object({
+  agentId: z.string().uuid(),
+  appointmentTypes: z.string().nullable().optional(),
+  appointmentDuration: z.number().int().nullable().optional(),
+  bookingBuffer: z.number().int().nullable().optional(),
+  officeHours: z.string().nullable().optional(),
+  leadRoutingPrefs: z.string().nullable().optional(),
+  handoffRules: z.string().nullable().optional(),
+  transferInstructions: z.string().nullable().optional(),
+  businessNotes: z.string().nullable().optional(),
+});
+
 export type InsertBusinessSettings = z.infer<typeof insertBusinessSettingsSchema>;
 export type BusinessSettings = typeof businessSettingsTable.$inferSelect;
 
@@ -59,7 +78,13 @@ export const onboardingProgressTable = pgTable("onboarding_progress", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertOnboardingProgressSchema = createInsertSchema(onboardingProgressTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertOnboardingProgressSchema = z.object({
+  agentId: z.string().uuid(),
+  currentStep: z.number().int().optional(),
+  completedSteps: z.string().optional(),
+  isComplete: z.boolean().optional(),
+});
+
 export type InsertOnboardingProgress = z.infer<typeof insertOnboardingProgressSchema>;
 export type OnboardingProgress = typeof onboardingProgressTable.$inferSelect;
 
@@ -67,27 +92,40 @@ export type OnboardingProgress = typeof onboardingProgressTable.$inferSelect;
 export const leadsTable = pgTable("leads", {
   id: uuid("id").primaryKey().defaultRandom(),
   agentId: uuid("agent_id").notNull().references(() => agentProfilesTable.id, { onDelete: 'cascade' }),
-  firstName: text("first_name").notNull(),
-  lastName: text("last_name").notNull(),
-  email: text("email"),
+  name: text("name").notNull(),
   phone: text("phone"),
-  address: text("address"),
-  city: text("city"),
-  state: text("state"),
-  zipCode: text("zip_code"),
-  status: leadStatusEnum("status").notNull().default('new'),
+  email: text("email"),
   source: text("source"),
+  status: leadStatusEnum("status").notNull().default('new'),
+  intent: text("intent"),
   notes: text("notes"),
-  lastContactDate: timestamp("last_contact_date"),
-  nextFollowUpDate: timestamp("next_follow_up_date"),
-  estimatedValue: decimal("estimated_value", { precision: 10, scale: 2 }),
-  priority: integer("priority").default(1),
+  score: integer("score"),
   tags: text("tags"),
+  lastContact: timestamp("last_contact"),
+  nextFollowUp: timestamp("next_follow_up"),
+  conversionProbability: integer("conversion_probability"),
+  estimatedValue: decimal("estimated_value", { precision: 12, scale: 2 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertLeadSchema = createInsertSchema(leadsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertLeadSchema = z.object({
+  agentId: z.string().uuid(),
+  name: z.string(),
+  phone: z.string().nullable().optional(),
+  email: z.string().nullable().optional(),
+  source: z.string().nullable().optional(),
+  status: z.enum(['new', 'contacted', 'qualified', 'unqualified', 'converted']).optional(),
+  intent: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
+  score: z.number().int().nullable().optional(),
+  tags: z.string().nullable().optional(),
+  lastContact: z.date().nullable().optional(),
+  nextFollowUp: z.date().nullable().optional(),
+  conversionProbability: z.number().int().nullable().optional(),
+  estimatedValue: z.string().nullable().optional(),
+});
+
 export type InsertLead = z.infer<typeof insertLeadSchema>;
 export type Lead = typeof leadsTable.$inferSelect;
 
@@ -95,35 +133,60 @@ export type Lead = typeof leadsTable.$inferSelect;
 export const listingsTable = pgTable("listings", {
   id: uuid("id").primaryKey().defaultRandom(),
   agentId: uuid("agent_id").notNull().references(() => agentProfilesTable.id, { onDelete: 'cascade' }),
-  mlsNumber: text("mls_number").unique(),
+  mlsNumber: text("mls_number"),
   address: text("address").notNull(),
-  city: text("city").notNull(),
-  state: text("state").notNull(),
-  zipCode: text("zip_code").notNull(),
-  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-  bedrooms: integer("bedrooms"),
-  bathrooms: decimal("bathrooms", { precision: 3, scale: 1 }),
-  squareFeet: integer("square_feet"),
+  city: text("city"),
+  state: text("state"),
+  zipCode: text("zip_code"),
+  price: decimal("price", { precision: 12, scale: 2 }),
+  beds: integer("beds"),
+  baths: decimal("baths", { precision: 3, scale: 1 }),
+  sqft: integer("sqft"),
   lotSize: decimal("lot_size", { precision: 8, scale: 2 }),
   yearBuilt: integer("year_built"),
   propertyType: text("property_type"),
+  status: listingStatusEnum("status").notNull().default('active'),
+  source: listingSourceEnum("source").notNull().default('manual'),
   description: text("description"),
   features: text("features"),
   images: text("images"),
-  status: listingStatusEnum("status").notNull().default('active'),
-  source: listingSourceEnum("source").notNull().default('manual'),
-  listingDate: timestamp("listing_date"),
-  expirationDate: timestamp("expiration_date"),
-  soldDate: timestamp("sold_date"),
-  soldPrice: decimal("sold_price", { precision: 10, scale: 2 }),
+  virtualTourUrl: text("virtual_tour_url"),
+  listingUrl: text("listing_url"),
   daysOnMarket: integer("days_on_market"),
-  showingInstructions: text("showing_instructions"),
+  pricePerSqft: decimal("price_per_sqft", { precision: 8, scale: 2 }),
+  publicRemarks: text("public_remarks"),
   privateRemarks: text("private_remarks"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertListingSchema = createInsertSchema(listingsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertListingSchema = z.object({
+  agentId: z.string().uuid(),
+  mlsNumber: z.string().nullable().optional(),
+  address: z.string(),
+  city: z.string().nullable().optional(),
+  state: z.string().nullable().optional(),
+  zipCode: z.string().nullable().optional(),
+  price: z.string().nullable().optional(),
+  beds: z.number().int().nullable().optional(),
+  baths: z.string().nullable().optional(),
+  sqft: z.number().int().nullable().optional(),
+  lotSize: z.string().nullable().optional(),
+  yearBuilt: z.number().int().nullable().optional(),
+  propertyType: z.string().nullable().optional(),
+  status: z.enum(['active', 'pending', 'sold', 'withdrawn']).optional(),
+  source: z.enum(['mls', 'manual', 'import']).optional(),
+  description: z.string().nullable().optional(),
+  features: z.string().nullable().optional(),
+  images: z.string().nullable().optional(),
+  virtualTourUrl: z.string().nullable().optional(),
+  listingUrl: z.string().nullable().optional(),
+  daysOnMarket: z.number().int().nullable().optional(),
+  pricePerSqft: z.string().nullable().optional(),
+  publicRemarks: z.string().nullable().optional(),
+  privateRemarks: z.string().nullable().optional(),
+});
+
 export type InsertListing = z.infer<typeof insertListingSchema>;
 export type Listing = typeof listingsTable.$inferSelect;
 
@@ -135,23 +198,40 @@ export const appointmentsTable = pgTable("appointments", {
   listingId: uuid("listing_id").references(() => listingsTable.id, { onDelete: 'set null' }),
   title: text("title").notNull(),
   description: text("description"),
-  appointmentType: text("appointment_type").notNull(),
-  scheduledDate: timestamp("scheduled_date").notNull(),
-  duration: integer("duration").notNull().default(60),
-  location: text("location"),
-  attendeeNames: text("attendee_names"),
-  attendeeEmails: text("attendee_emails"),
-  attendeePhones: text("attendee_phones"),
+  scheduledAt: timestamp("scheduled_at").notNull(),
+  duration: integer("duration").default(60), // in minutes
   status: appointmentStatusEnum("status").notNull().default('scheduled'),
-  reminderSent: boolean("reminder_sent").notNull().default(false),
+  appointmentType: text("appointment_type"),
+  location: text("location"),
   notes: text("notes"),
-  outcome: text("outcome"),
+  reminderSent: boolean("reminder_sent").default(false),
+  confirmed: boolean("confirmed").default(false),
+  cancellationReason: text("cancellation_reason"),
+  rescheduledFrom: uuid("rescheduled_from"),
   googleEventId: text("google_event_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertAppointmentSchema = createInsertSchema(appointmentsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertAppointmentSchema = z.object({
+  agentId: z.string().uuid(),
+  leadId: z.string().uuid().nullable().optional(),
+  listingId: z.string().uuid().nullable().optional(),
+  title: z.string(),
+  description: z.string().nullable().optional(),
+  scheduledAt: z.date(),
+  duration: z.number().int().optional(),
+  status: z.enum(['scheduled', 'confirmed', 'completed', 'cancelled', 'no_show']).optional(),
+  appointmentType: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
+  reminderSent: z.boolean().optional(),
+  confirmed: z.boolean().optional(),
+  cancellationReason: z.string().nullable().optional(),
+  rescheduledFrom: z.string().uuid().nullable().optional(),
+  googleEventId: z.string().nullable().optional(),
+});
+
 export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 export type Appointment = typeof appointmentsTable.$inferSelect;
 
@@ -160,23 +240,41 @@ export const callsTable = pgTable("calls", {
   id: uuid("id").primaryKey().defaultRandom(),
   agentId: uuid("agent_id").notNull().references(() => agentProfilesTable.id, { onDelete: 'cascade' }),
   leadId: uuid("lead_id").references(() => leadsTable.id, { onDelete: 'set null' }),
+  direction: text("direction").notNull(), // 'inbound' | 'outbound'
   phoneNumber: text("phone_number").notNull(),
-  direction: text("direction").notNull(),
-  duration: integer("duration"),
-  outcome: callOutcomeEnum("outcome").notNull(),
-  notes: text("notes"),
-  recording: text("recording"),
-  transcript: text("transcript"),
-  sentiment: text("sentiment"),
+  duration: integer("duration"), // in seconds
+  outcome: callOutcomeEnum("outcome"),
   summary: text("summary"),
-  actionItems: text("action_items"),
-  vapiCallId: text("vapi_call_id"),
+  notes: text("notes"),
+  sentiment: text("sentiment"),
+  transcript: text("transcript"),
+  recordingUrl: text("recording_url"),
+  followUpRequired: boolean("follow_up_required").default(false),
+  followUpDate: timestamp("follow_up_date"),
+  tags: text("tags"),
   twilioCallSid: text("twilio_call_sid"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertCallSchema = createInsertSchema(callsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCallSchema = z.object({
+  agentId: z.string().uuid(),
+  leadId: z.string().uuid().nullable().optional(),
+  direction: z.string(),
+  phoneNumber: z.string(),
+  duration: z.number().int().nullable().optional(),
+  outcome: z.enum(['completed', 'no_answer', 'voicemail', 'busy', 'failed']).nullable().optional(),
+  summary: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
+  sentiment: z.string().nullable().optional(),
+  transcript: z.string().nullable().optional(),
+  recordingUrl: z.string().nullable().optional(),
+  followUpRequired: z.boolean().optional(),
+  followUpDate: z.date().nullable().optional(),
+  tags: z.string().nullable().optional(),
+  twilioCallSid: z.string().nullable().optional(),
+});
+
 export type InsertCall = z.infer<typeof insertCallSchema>;
 export type Call = typeof callsTable.$inferSelect;
 
@@ -184,20 +282,32 @@ export type Call = typeof callsTable.$inferSelect;
 export const voiceSettingsTable = pgTable("voice_settings", {
   id: uuid("id").primaryKey().defaultRandom(),
   agentId: uuid("agent_id").notNull().unique().references(() => agentProfilesTable.id, { onDelete: 'cascade' }),
-  voiceId: text("voice_id"),
   phoneNumber: text("phone_number"),
+  voiceId: text("voice_id"),
   greeting: text("greeting"),
-  vapiAssistantId: text("vapi_assistant_id"),
-  vapiPhoneNumberId: text("vapi_phone_number_id"),
-  twilioPhoneNumberSid: text("twilio_phone_number_sid"),
-  isActive: boolean("is_active").notNull().default(false),
-  maxCallDuration: integer("max_call_duration").default(1800),
+  personality: text("personality"),
+  instructions: text("instructions"),
+  allowedActions: text("allowed_actions"),
+  escalationBehavior: text("escalation_behavior"),
+  isActive: boolean("is_active").default(false),
   callbackUrl: text("callback_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertVoiceSettingsSchema = createInsertSchema(voiceSettingsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertVoiceSettingsSchema = z.object({
+  agentId: z.string().uuid(),
+  phoneNumber: z.string().nullable().optional(),
+  voiceId: z.string().nullable().optional(),
+  greeting: z.string().nullable().optional(),
+  personality: z.string().nullable().optional(),
+  instructions: z.string().nullable().optional(),
+  allowedActions: z.string().nullable().optional(),
+  escalationBehavior: z.string().nullable().optional(),
+  isActive: z.boolean().optional(),
+  callbackUrl: z.string().nullable().optional(),
+});
+
 export type InsertVoiceSettings = z.infer<typeof insertVoiceSettingsSchema>;
 export type VoiceSettings = typeof voiceSettingsTable.$inferSelect;
 
@@ -205,16 +315,24 @@ export type VoiceSettings = typeof voiceSettingsTable.$inferSelect;
 export const faqsTable = pgTable("faqs", {
   id: uuid("id").primaryKey().defaultRandom(),
   agentId: uuid("agent_id").notNull().references(() => agentProfilesTable.id, { onDelete: 'cascade' }),
+  isActive: boolean("is_active").default(true),
   question: text("question").notNull(),
   answer: text("answer").notNull(),
   category: text("category"),
-  isActive: boolean("is_active").notNull().default(true),
   order: integer("order").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertFaqSchema = createInsertSchema(faqsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertFaqSchema = z.object({
+  agentId: z.string().uuid(),
+  isActive: z.boolean().optional(),
+  question: z.string(),
+  answer: z.string(),
+  category: z.string().nullable().optional(),
+  order: z.number().int().optional(),
+});
+
 export type InsertFaq = z.infer<typeof insertFaqSchema>;
 export type Faq = typeof faqsTable.$inferSelect;
 
@@ -223,41 +341,69 @@ export const integrationsTable = pgTable("integrations", {
   id: uuid("id").primaryKey().defaultRandom(),
   agentId: uuid("agent_id").notNull().references(() => agentProfilesTable.id, { onDelete: 'cascade' }),
   name: text("name").notNull(),
-  type: text("type").notNull(),
-  status: integrationStatusEnum("status").notNull().default('disconnected'),
-  settings: text("settings"),
+  type: text("type").notNull(), // 'google_calendar', 'gmail', 'mls', etc.
+  status: integrationStatusEnum("status").default('disconnected'),
+  settings: text("settings"), // JSON string
   lastSync: timestamp("last_sync"),
   errorMessage: text("error_message"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertIntegrationSchema = createInsertSchema(integrationsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertIntegrationSchema = z.object({
+  agentId: z.string().uuid(),
+  name: z.string(),
+  type: z.string(),
+  status: z.enum(['connected', 'disconnected', 'error']).optional(),
+  settings: z.string().nullable().optional(),
+  lastSync: z.date().nullable().optional(),
+  errorMessage: z.string().nullable().optional(),
+});
+
 export type InsertIntegration = z.infer<typeof insertIntegrationSchema>;
 export type Integration = typeof integrationsTable.$inferSelect;
 
-// Plan Entitlements 
+// Plan Entitlements
 export const planEntitlementsTable = pgTable("plan_entitlements", {
   id: uuid("id").primaryKey().defaultRandom(),
   agentId: uuid("agent_id").notNull().unique().references(() => agentProfilesTable.id, { onDelete: 'cascade' }),
-  planName: text("plan_name").notNull().default('starter'),
-  maxLeads: integer("max_leads").notNull().default(100),
-  maxListings: integer("max_listings").notNull().default(10),
-  maxCalls: integer("max_calls").notNull().default(50),
-  hasVoiceAgent: boolean("has_voice_agent").notNull().default(false),
-  hasAdvancedAnalytics: boolean("has_advanced_analytics").notNull().default(false),
-  hasApiAccess: boolean("has_api_access").notNull().default(false),
-  customBranding: boolean("custom_branding").notNull().default(false),
-  stripePriceId: text("stripe_price_id"),
+  isActive: boolean("is_active").default(true),
+  planName: text("plan_name"),
+  maxLeads: integer("max_leads"),
+  maxListings: integer("max_listings"),
+  maxCalls: integer("max_calls"),
+  hasVoiceAgent: boolean("has_voice_agent").default(false),
+  hasCrmIntegrations: boolean("has_crm_integrations").default(false),
+  hasAdvancedAnalytics: boolean("has_advanced_analytics").default(false),
+  customBranding: boolean("custom_branding").default(false),
+  prioritySupport: boolean("priority_support").default(false),
+  apiAccess: boolean("api_access").default(false),
   stripeSubscriptionId: text("stripe_subscription_id"),
-  billingPeriod: text("billing_period").default('monthly'),
+  currentPeriodStart: timestamp("current_period_start"),
+  currentPeriodEnd: timestamp("current_period_end"),
   trialEndsAt: timestamp("trial_ends_at"),
-  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const insertPlanEntitlementSchema = createInsertSchema(planEntitlementsTable).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertPlanEntitlementSchema = z.object({
+  agentId: z.string().uuid(),
+  isActive: z.boolean().optional(),
+  planName: z.string().optional(),
+  maxLeads: z.number().int().optional(),
+  maxListings: z.number().int().optional(),
+  maxCalls: z.number().int().optional(),
+  hasVoiceAgent: z.boolean().optional(),
+  hasCrmIntegrations: z.boolean().optional(),
+  hasAdvancedAnalytics: z.boolean().optional(),
+  customBranding: z.boolean().optional(),
+  prioritySupport: z.boolean().optional(),
+  apiAccess: z.boolean().optional(),
+  stripeSubscriptionId: z.string().nullable().optional(),
+  currentPeriodStart: z.date().nullable().optional(),
+  currentPeriodEnd: z.date().nullable().optional(),
+  trialEndsAt: z.date().nullable().optional(),
+});
+
 export type InsertPlanEntitlement = z.infer<typeof insertPlanEntitlementSchema>;
 export type PlanEntitlement = typeof planEntitlementsTable.$inferSelect;
-
