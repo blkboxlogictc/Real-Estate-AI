@@ -58,7 +58,7 @@ router.put("/appointments/:id", async (req, res) => {
     const body = UpdateAppointmentBody.parse(req.body);
     const updated = await db
       .update(appointmentsTable)
-      .set({ ...body, updatedAt: new Date() })
+      .set({ ...body })
       .where(and(eq(appointmentsTable.id, id), eq(appointmentsTable.agentId, agentId)))
       .returning();
       

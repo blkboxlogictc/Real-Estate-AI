@@ -29,16 +29,16 @@ router.get("/voice-settings", async (req, res) => {
         .insert(voiceSettingsTable)
         .values({
           agentId,
-          voiceId: "nova",
+          selectedVoice: "nova",
           greeting: "Hi, you've reached my real estate office. How can I help you today?",
           isActive: false,
         })
         .returning();
       return res.json(created[0]);
     }
-    res.json(settings[0]);
+    return res.json(settings[0]);
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 
@@ -66,9 +66,9 @@ router.put("/voice-settings", async (req, res) => {
       .set({ ...body, updatedAt: new Date() })
       .where(eq(voiceSettingsTable.agentId, agentId))
       .returning();
-    res.json(updated[0]);
+    return res.json(updated[0]);
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 
@@ -86,14 +86,14 @@ router.get("/vapi/assistant/status", async (req, res) => {
     }
 
     const s = settings[0];
-    res.json({
+    return res.json({
       assistantId: s.vapiAssistantId,
       isActive: s.isActive,
-      phoneNumber: s.phoneNumber,
+      phoneNumber: s.linkedPhone,
       status: s.vapiAssistantId ? "configured" : "not_configured",
     });
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 

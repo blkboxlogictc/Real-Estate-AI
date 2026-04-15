@@ -22,7 +22,7 @@ router.get("/faqs", async (req, res) => {
       .select()
       .from(faqsTable)
       .where(eq(faqsTable.agentId, agentId))
-      .orderBy(faqsTable.order);
+      .orderBy(faqsTable.id);
     return res.json(faqs);
   } catch (error) {
     return res.status(400).json({ error: (error as Error).message });
@@ -50,7 +50,7 @@ router.put("/faqs/:id", async (req, res) => {
     const body = UpdateFaqBody.parse(req.body);
     const updated = await db
       .update(faqsTable)
-      .set({ ...body, updatedAt: new Date() })
+      .set({ ...body })
       .where(and(eq(faqsTable.id, id), eq(faqsTable.agentId, agentId)))
       .returning();
       
@@ -58,9 +58,9 @@ router.put("/faqs/:id", async (req, res) => {
       return res.status(404).json({ error: "FAQ not found" });
     }
     
-    res.json(updated[0]);
+    return res.json(updated[0]);
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 
@@ -77,9 +77,9 @@ router.delete("/faqs/:id", async (req, res) => {
       return res.status(404).json({ error: "FAQ not found" });
     }
     
-    res.status(204).send();
+    return res.status(204).send();
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 

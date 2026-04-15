@@ -67,7 +67,7 @@ router.get("/leads/:id", async (req, res) => {
     .limit(1);
 
   if (lead.length === 0) return res.status(404).json({ error: "Not found" });
-  res.json(lead[0]);
+  return res.json(lead[0]);
 });
 
 router.put("/leads/:id", async (req, res) => {
@@ -79,7 +79,7 @@ router.put("/leads/:id", async (req, res) => {
     .where(and(eq(leadsTable.id, id), eq(leadsTable.agentId, DEMO_AGENT_ID)))
     .returning();
   if (updated.length === 0) return res.status(404).json({ error: "Not found" });
-  res.json(updated[0]);
+  return res.json(updated[0]);
 });
 
 export default router;

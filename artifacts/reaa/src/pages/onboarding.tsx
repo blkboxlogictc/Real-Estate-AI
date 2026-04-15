@@ -31,7 +31,7 @@ export default function Onboarding() {
   const { toast } = useToast();
 
   const [areaCode, setAreaCode] = useState("");
-  const { data: numbers, refetch: searchNumbers } = useSearchTwilioNumbers({ areaCode }, { query: { enabled: false } });
+  const { data: numbers, refetch: searchNumbers } = useSearchTwilioNumbers({ areaCode }, { query: { enabled: false, queryKey: ['twilioNumbers', areaCode] } });
 
   useEffect(() => {
     if (progress?.currentStep) {

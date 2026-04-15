@@ -80,13 +80,13 @@ router.get("/listings/:id", async (req, res) => {
     }
     
     const l = listing[0];
-    res.json({
+    return res.json({
       ...l,
       price: l.price ? parseFloat(l.price.toString()) : null,
       bathrooms: l.baths ? parseFloat(l.baths.toString()) : null,
     });
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 
@@ -111,13 +111,13 @@ router.put("/listings/:id", async (req, res) => {
     }
     
     const l = updated[0];
-    res.json({
+    return res.json({
       ...l,
       price: l.price ? parseFloat(l.price.toString()) : null,
       bathrooms: l.baths ? parseFloat(l.baths.toString()) : null,
     });
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 
@@ -134,9 +134,9 @@ router.delete("/listings/:id", async (req, res) => {
       return res.status(404).json({ error: "Listing not found" });
     }
     
-    res.status(204).send();
+    return res.status(204).send();
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 

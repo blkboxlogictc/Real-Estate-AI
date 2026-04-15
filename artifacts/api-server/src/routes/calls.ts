@@ -51,9 +51,9 @@ router.get("/calls/:id", async (req, res) => {
       return res.status(404).json({ error: "Call not found" });
     }
     
-    res.json(call[0]);
+    return res.json(call[0]);
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 
