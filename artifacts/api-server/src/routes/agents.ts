@@ -15,12 +15,12 @@ import {
 const router = Router();
 
 // Helper function to get agent ID from request
-const getAgentId = (req: any): string => {
+const getAgentId = (req: any): number => {
   const agentId = req.headers['x-agent-id'] || req.user?.id;
   if (!agentId) {
     throw new Error('Agent ID not found in request');
   }
-  return agentId;
+  return parseInt(agentId.toString(), 10);
 };
 
 router.get("/agents/profile", async (req, res) => {

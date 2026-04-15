@@ -5,6 +5,7 @@ export const voiceSettingsTable = pgTable("voice_settings", {
   id: serial("id").primaryKey(),
   agentId: integer("agent_id").notNull().unique(),
   selectedVoice: text("selected_voice"),
+  voiceId: text("voice_id"),
   greeting: text("greeting"),
   personality: text("personality"),
   allowedActions: text("allowed_actions"),
@@ -12,6 +13,7 @@ export const voiceSettingsTable = pgTable("voice_settings", {
   isActive: boolean("is_active").notNull().default(false),
   vapiAssistantId: text("vapi_assistant_id"),
   linkedPhone: text("linked_phone"),
+  phoneNumber: text("phone_number"),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 

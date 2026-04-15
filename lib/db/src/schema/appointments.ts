@@ -13,6 +13,7 @@ export const appointmentsTable = pgTable("appointments", {
   notes: text("notes"),
   calendarSynced: boolean("calendar_synced").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const insertAppointmentSchema = z.object({

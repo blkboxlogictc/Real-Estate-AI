@@ -6,7 +6,9 @@ export const faqsTable = pgTable("faqs", {
   agentId: integer("agent_id").notNull(),
   question: text("question").notNull(),
   answer: text("answer").notNull(),
+  order: integer("order").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const insertFaqSchema = z.object({
