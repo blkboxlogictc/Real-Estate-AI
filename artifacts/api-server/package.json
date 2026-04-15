@@ -7,7 +7,7 @@
     "dev": "set NODE_ENV=development && pnpm run build && node --env-file=../../.env --enable-source-maps ./dist/index.mjs",
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "node --max-old-space-size=256 ./node_modules/.bin/tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@workspace/api-zod": "workspace:*",
