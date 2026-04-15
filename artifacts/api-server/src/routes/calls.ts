@@ -31,9 +31,9 @@ router.get("/calls", async (req, res) => {
       .where(and(...conditions))
       .orderBy(sql`${callsTable.createdAt} DESC`);
 
-    res.json(calls);
+    return res.json(calls);
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 

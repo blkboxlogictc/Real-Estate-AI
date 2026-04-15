@@ -66,9 +66,9 @@ router.put("/appointments/:id", async (req, res) => {
       return res.status(404).json({ error: "Appointment not found" });
     }
     
-    res.json(updated[0]);
+    return res.json(updated[0]);
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 

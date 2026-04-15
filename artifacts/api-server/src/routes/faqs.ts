@@ -23,9 +23,9 @@ router.get("/faqs", async (req, res) => {
       .from(faqsTable)
       .where(eq(faqsTable.agentId, agentId))
       .orderBy(faqsTable.order);
-    res.json(faqs);
+    return res.json(faqs);
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 

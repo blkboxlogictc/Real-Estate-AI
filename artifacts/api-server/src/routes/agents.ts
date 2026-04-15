@@ -36,9 +36,9 @@ router.get("/agents/profile", async (req, res) => {
       return res.status(404).json({ error: 'Agent profile not found' });
     }
     
-    res.json(profile[0]);
+    return res.json(profile[0]);
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 
@@ -56,9 +56,9 @@ router.put("/agents/profile", async (req, res) => {
       return res.status(404).json({ error: 'Agent profile not found' });
     }
     
-    res.json(updated[0]);
+    return res.json(updated[0]);
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 
@@ -88,9 +88,9 @@ router.get("/agents/business-settings", async (req, res) => {
         .returning();
       return res.json(newSettings[0]);
     }
-    res.json(settings[0]);
+    return res.json(settings[0]);
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 
@@ -117,9 +117,9 @@ router.put("/agents/business-settings", async (req, res) => {
       .set({ ...body, updatedAt: new Date() })
       .where(eq(businessSettingsTable.agentId, agentId))
       .returning();
-    res.json(updated[0]);
+    return res.json(updated[0]);
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 
@@ -146,13 +146,13 @@ router.get("/agents/onboarding", async (req, res) => {
     }
 
     const row = progress[0];
-    res.json({
+    return res.json({
       currentStep: row.currentStep,
       completedSteps: JSON.parse(row.completedSteps),
       isComplete: row.isComplete,
     });
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 
@@ -208,13 +208,13 @@ router.put("/agents/onboarding", async (req, res) => {
       .returning();
 
     const row = updated[0];
-    res.json({
+    return res.json({
       currentStep: row.currentStep,
       completedSteps: JSON.parse(row.completedSteps),
       isComplete: row.isComplete,
     });
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    return res.status(400).json({ error: (error as Error).message });
   }
 });
 
