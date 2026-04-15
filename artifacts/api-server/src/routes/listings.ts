@@ -34,7 +34,7 @@ router.get("/listings", async (req, res) => {
     res.json(listings.map(l => ({
       ...l,
       price: l.price ? parseFloat(l.price.toString()) : null,
-      bathrooms: l.bathrooms ? parseFloat(l.bathrooms.toString()) : null,
+      bathrooms: l.baths ? parseFloat(l.baths.toString()) : null,
     })));
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
@@ -50,13 +50,15 @@ router.post("/listings", async (req, res) => {
       .values({
         ...body,
         agentId,
+        price: body.price?.toString() || null,
+        baths: body.baths?.toString() || null,
       })
       .returning();
     const l = created[0];
     res.status(201).json({
       ...l,
       price: l.price ? parseFloat(l.price.toString()) : null,
-      bathrooms: l.bathrooms ? parseFloat(l.bathrooms.toString()) : null,
+      bathrooms: l.baths ? parseFloat(l.baths.toString()) : null,
     });
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
@@ -81,7 +83,7 @@ router.get("/listings/:id", async (req, res) => {
     res.json({
       ...l,
       price: l.price ? parseFloat(l.price.toString()) : null,
-      bathrooms: l.bathrooms ? parseFloat(l.bathrooms.toString()) : null,
+      bathrooms: l.baths ? parseFloat(l.baths.toString()) : null,
     });
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
@@ -97,6 +99,8 @@ router.put("/listings/:id", async (req, res) => {
       .update(listingsTable)
       .set({
         ...body,
+        price: body.price?.toString() || null,
+        baths: body.baths?.toString() || null,
         updatedAt: new Date(),
       })
       .where(and(eq(listingsTable.id, id), eq(listingsTable.agentId, agentId)))
@@ -110,7 +114,7 @@ router.put("/listings/:id", async (req, res) => {
     res.json({
       ...l,
       price: l.price ? parseFloat(l.price.toString()) : null,
-      bathrooms: l.bathrooms ? parseFloat(l.bathrooms.toString()) : null,
+      bathrooms: l.baths ? parseFloat(l.baths.toString()) : null,
     });
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
